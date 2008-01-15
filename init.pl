@@ -1,8 +1,3 @@
-:- multifile sccs_id/1.
-:- dynamic sccs_id/1.
-
-sccs_id('@(#)init.pl	1.12 04/17/07').
-
 :- use_module(library(date), [
 	datime/1
    ]).
