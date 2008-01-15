@@ -1,10 +1,3 @@
-:- multifile sccs_id/1.
-:- dynamic sccs_id/1.
-
-:- multifile unknown_predicate_handler/3.
-
-sccs_id('@(#)utils.pl	1.14 08/31/07').
-
 :- use_module(library(basics), [
 	member/2,
 	memberchk/2
@@ -12,6 +5,10 @@ sccs_id('@(#)utils.pl	1.14 08/31/07').
 
 :- use_module(library(caseconv), [
 	lower/2
+   ]).
+
+:- use_module(library(environ), [
+	environ/2
    ]).
 
 
@@ -29,11 +26,8 @@ h    :- halt.
 
 ini  :- force_reload_file(myhome('prolog.ini')).
 pcc  :-
-	( environ('MYHOME', MYHOME) ->
-	  true
-	; environ('HOME', MYHOME)
-	),
-	concat_atom([MYHOME, '/specialist/bin/pcc.pl'], PCCFile),
+	environ('HOME', HOME),
+	concat_atom([HOME, '/specialist/bin/pcc.pl'], PCCFile),
 	compile(PCCFile).
 
 show_all_preds :-
