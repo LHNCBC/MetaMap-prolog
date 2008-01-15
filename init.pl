@@ -23,12 +23,6 @@ sccs_id('@(#)init.pl	1.12 04/17/07').
 	concat_atom/2
    ]).
 
-get_home_dir(HOME) :-
-	( environ('MYHOME', HOME) ->
-	  true
-        ; environ('HOME', HOME)
-	).
-
 :- op(700, fy, bcl).       % BASE CLAUSE LISTING: allows   | ?- bcl <predicate>.
 :- op(700, fy, bcc).       % BASE CLAUSE COUNT:   allows   | ?- bcc <predicate>. 
 :- op(700, fy, ls).        % LISTING:             allows   | ?- l <predicate>. 
@@ -61,7 +55,7 @@ call_or_asserta(Term) :-
 
 :- environ('SKR', SKR),
    concat_atom([SKR, '/prolog/'], SKRPrologUtilsDir),
-   get_home_dir(HOME),
+   environ('HOME', HOME),
    concat_atom([HOME, '/specialist/SKR/prolog/'], HomePrologUtilsDir),
    call_or_asserta(file_search_path(prolog_utils, SKRPrologUtilsDir)),
    call_or_asserta(file_search_path(prolog_utils, HomePrologUtilsDir)).
