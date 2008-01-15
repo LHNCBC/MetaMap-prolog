@@ -2,10 +2,10 @@
 	last/2
    ]).
 
-:- multifile sccs_id/1.
-:- dynamic sccs_id/1.
+:- use_module(library(environ), [
+	environ/2
+   ]).
 
-sccs_id('@(#)startup.pl	1.31 07/09/07').
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% STARTUP STUFF %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -13,13 +13,11 @@ sccs_id('@(#)startup.pl	1.31 07/09/07').
 
 l :- init_application_environment.
 
-a :- environ('HERE', PWD), show_init_data(PWD).
+a :- environ('PWD', PWD), show_init_data(PWD).
 
 init_application_environment :-
-	get_home_dir(HOME),
-	% The $HERE environment variable is set in SKRenv,
-	% which is called by the 'p' script, which starts Prolog.
-	environ('HERE',  PWD),
+	environ('HOME', HOME),
+	environ('PWD',  PWD),
 	determine_environment(HOME, PWD, Env),
 	init_application(PWD, Env),
 	nl,
@@ -175,7 +173,7 @@ concat_atom_1(TermToConcat, Atom) :-
 	; concat_atom(TermToConcat, Atom)
 	).
 
-static_path_data(home,			env('MYHOME')).
+static_path_data(home,			env('HOME')).
 static_path_data(nls,			env('NLS')).
 static_path_data(specialist,            [env('NLS'), 		specialist]).
 static_path_data(specialist_devl,       [path(home), 		specialist]).
@@ -189,7 +187,7 @@ static_path_data(lexicon_base,  	[path(skr_src_home),	lexicon]).
 static_path_data(usemrep,		[path(saw_devl),	'USemrep']).
 
 % These path definitions are the ones used in use_module declarations
-define_path(_, 		home,               env('MYHOME')).
+define_path(_, 		home,               env('HOME')).
 define_path(_, 		lexicon,            [path(lexicon_base), lexicon]).
 define_path(_, 		metamap,            [path(skr_src_home),	 metamap]).
 define_path(_, 		morph,		    [path(lexicon_base), morph]).
