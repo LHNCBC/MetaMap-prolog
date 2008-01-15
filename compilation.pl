@@ -1,8 +1,3 @@
-:- multifile sccs_id/1.
-:- dynamic sccs_id/1.
-
-sccs_id('@(#)compilation.pl	1.2 10/02/06').
-
 :- use_module(library(directory), [
 	file_property/3
    ]).

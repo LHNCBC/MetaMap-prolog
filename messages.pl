@@ -1,8 +1,3 @@
-:- multifile sccs_id/1.
-:- dynamic sccs_id/1.
-
-sccs_id('@(#)messages.pl	1.9 03/26/07').
-
 :- dynamic error_or_warning_message/3.
 
 
