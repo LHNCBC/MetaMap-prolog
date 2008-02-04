@@ -70,8 +70,14 @@ determine_application(PWD, Area) :-
 	  Area = skr
 	; sub_atom('emrep', PWD) ->
 	  Area = usemrep
-	; format('~n~nNot in application directory; application env not initiated.~n~n', []),
-	  fail
+	; environ('USER', USER),
+	  ( USER == 'lang' ->
+	    Area = skr
+	  ; USER == 'alan' ->
+	    Area = skr
+	  ; format('~n~nNot in application directory; application env not initiated.~n~n', []),
+	    fail
+	  )
 	).
 
 
