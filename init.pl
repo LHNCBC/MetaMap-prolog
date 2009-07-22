@@ -1,7 +1,3 @@
-:- use_module(library(date), [
-	datime/1
-   ]).
-
 :- use_module(library(environ), [
 	environ/2
    ]).
@@ -55,23 +51,6 @@ call_or_asserta(Term) :-
    call_or_asserta(file_search_path(prolog_utils, SKRPrologUtilsDir)),
    call_or_asserta(file_search_path(prolog_utils, HomePrologUtilsDir)).
 
-:- ensure_loaded(prolog_utils(compilation)),
-   absolute_file_name(prolog_utils(compilation), CompilationAbsoluteFileName),
-   retractall(compile_time(CompilationAbsoluteFileName, _)),
-   datime(TimeStamp),
-   assert(compile_time(CompilationAbsoluteFileName, TimeStamp)).
+:- ensure_loaded(prolog_utils(compilation)).
 
-:- environ('PWD', PWD),
-   sub_atom(usemrep, PWD),
-   { prolog_utils(semrep) }
- ; true.
-
-% :- current_predicate('SAVED STATE!!', 'SAVED STATE!!'), retract_access_status ; true.
-
-% defined in prolog_utils(startup)
 :- init_application_environment.
-
-:- absolute_file_name(prolog_utils(init), InitAbsoluteFileName),
-   retractall(compile_time(InitAbsoluteFileName, _)),
-   datime(TimeStamp),
-   assert(compile_time(InitAbsoluteFileName, TimeStamp)).
