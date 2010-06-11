@@ -33,7 +33,7 @@ pcc  :-
 show_all_preds :-
 	source_file(Pred, File),
 	functor(Pred, Func, Arity),
-	format('~a/~d:~40|~a~n', [Func,Arity,File]),
+	format(user_output, '~a/~d:~40|~a~n', [Func,Arity,File]),
 	fail
       ; true.
 
@@ -48,7 +48,7 @@ show_all_streams :-
 % close all streams
 cas :-
 	current_stream(FileName, StreamType, StreamID),
-	format('~w~n', [FileName-StreamType-StreamID]),
+	format(user_output, '~w~n', [FileName-StreamType-StreamID]),
 	close(StreamID),
 	fail
       ; true.
@@ -132,11 +132,11 @@ base_clause_listing(Predicate) :-
 	!,
 	base_clause_listing_1(Predicate, Module, Skeletal).
 base_clause_listing(Predicate) :-
-	format('No predicate ~w found~n', [Predicate]).
+	format(user_output, 'No predicate ~w found~n', [Predicate]).
 
 base_clause_listing_1(Predicate, Module, Skeletal) :-
 	functor(Skeletal, Predicate, Arity),
-	format('~n~q:~q/~q~n', [Module,Predicate,Arity]),
+	format(user_output, '~n~q:~q/~q~n', [Module,Predicate,Arity]),
 	setof(Skeletal, Module^Skeletal^call(Module:Skeletal), SolutionList),
 	write_list_with_format(SolutionList, '~q~n'),
 	fail
@@ -166,8 +166,8 @@ list_control_options :-
 	),
 	nls_system:is_control_option(usemrep, ShortControlOption, ControlOption, _, _),
 	( nonvar(X) ->
-	  format('~N-~w: ~w ~w ~w~n', [ShortControlOption,ControlOption,X,Y])
-	; format('~N-~w: ~w~n', [ShortControlOption,ControlOption])
+	  format(user_output, '~N-~w: ~w ~w ~w~n', [ShortControlOption,ControlOption,X,Y])
+	; format(user_output, '~N-~w: ~w~n', [ShortControlOption,ControlOption])
 	),
 	fail
       ; true.
@@ -176,7 +176,7 @@ list_control_options :-
 aco(Option) :-
 	var(Option),
 	!,
-	format('~nCannot assert a variable as a control option!~n', []),
+	format(user_output, '~nCannot assert a variable as a control option!~n', []),
 	fail.
 
 aco(Option) :-
@@ -196,17 +196,17 @@ assert_control_options([ShortControlOption|RestShortControlOptions], ProgramName
 assert_one_control_option(ShortControlOption, ProgramName) :-
 	( nls_system:is_control_option(usemrep, ShortControlOption, ControlOption, _, _) ->
 	      ( nls_system:control_option(ControlOption) ->
-		format('~NControl option ~w (-~w) is already in effect~n',
+		format(user_output, '~NControl option ~w (-~w) is already in effect~n',
 		       [ControlOption,ShortControlOption])
 	      ; ProgramName:override_control_option(assert, ControlOption) ->
-		format('~NControl option ~w (-~w) has already been overridden~n',
+		format(user_output, '~NControl option ~w (-~w) has already been overridden~n',
 		       [ControlOption,ShortControlOption])
 	      ; assert(nls_system:control_option(ControlOption)),
 	        assert(ProgramName:override_control_option(assert, ControlOption)),
-	        format('~NASSERTED control option ~w (-~w)~n',
+	        format(user_output, '~NASSERTED control option ~w (-~w)~n',
 		       [ControlOption,ShortControlOption])
 	      )
-	 ; format('~NERROR: ~q is not a known usemrep control option.~n',
+	 ; format(user_output, '~NERROR: ~q is not a known usemrep control option.~n',
 		   [ShortControlOption])
 	 ).
 
@@ -239,7 +239,7 @@ delete_one_control_option(ShortControlOption, ProgramName) :-
 	retract(nls_system:control_option(ControlOption)),
 	assert(ProgramName:override_control_option(retract, ControlOption)),
 	nls_system:is_control_option(usemrep, ShortControlOption, ControlOption, _, _),
-	format('~NRETRACTED control option ~w (-~w)~n',
+	format(user_output, '~NRETRACTED control option ~w (-~w)~n',
 	       [ControlOption,ShortControlOption]).
 
 delete_one_control_option(ShortControlOption, ProgramName) :-
@@ -247,12 +247,12 @@ delete_one_control_option(ShortControlOption, ProgramName) :-
 	     ( nls_system:control_option(ControlOption) ->
 	       retract(nls_system:control_option(ControlOption)),
 	       assert(ProgramName:override_control_option(retract, ControlOption)),
-	       format('~NRETRACTED control option ~w (-~w)~n',
+	       format(user_output, '~NRETRACTED control option ~w (-~w)~n',
 		      [ControlOption,ShortControlOption])
-	       ; format('~NERROR: ~q (~w) is not currently asserted as a usemrep control option.~n',
+	       ; format(user_output, '~NERROR: ~q (~w) is not currently asserted as a usemrep control option.~n',
 			 [ShortControlOption,ControlOption])
 		)
-	; format('~NERROR: ~q is not a known usemrep control option.~n',
+	; format(user_output, '~NERROR: ~q is not a known usemrep control option.~n',
 		 [ShortControlOption])
 	).
 
@@ -262,7 +262,7 @@ orf :-
 	program_abbreviation(Abbrev),
 	program_name(Name),
 	program_version(Version),
-	format('New input file: ', []),
+	format(user_output, 'New input file: ', []),
 	read(NewInputFile),
 	retractall(Name:override_file(infile, read, _)),
 	retractall(Name:override_file(outfile, write, _)),
@@ -294,7 +294,7 @@ bcc Predicate :-
         ; P = Predicate
         ),
 	base_clause_count(P, Arity, Num),
-	format('~w~n', [P/Arity-Num]),
+	format(user_output, '~w~n', [P/Arity-Num]),
 	fail
       ; true.
 
@@ -303,7 +303,7 @@ find_source_file(String) :-
 	source_file(FileName),
 	% satisfy this goal at most once!!
 	( sub_atom(String, FileName) -> true ),
-	format('~w~n', [FileName]),
+	format(user_output, '~w~n', [FileName]),
 	fail
       ; true.
 
@@ -323,7 +323,7 @@ n1s(N) :- setof(Pred/Prop, no_module_predicate_property(Pred, _Mod, Prop), List)
 n1sp :- setof(Pred/Prop, no_module_predicate_property(Pred, _Mod, Prop), List),
 	sort(List, SortedList),
 	length(List, N),
-	format('~w~n', [N]),
+	format(user_output, '~w~n', [N]),
 	write_list_with_format(SortedList, '~w~n').
 
 show_user_defined_preds :-
@@ -444,10 +444,10 @@ write_predicate_list_nl([First|Rest]) :-
 	write_predicate_list_nl(Rest).
 
 write_one_predicate(Module:PredName/Arity-List) :-
-	format('~w~n', [Module:PredName/Arity]),
+	format(user_output, '~w~n', [Module:PredName/Arity]),
 	write_list_with_format(List, '   *~w~n').
 write_one_predicate(PredName/Arity-List) :-
-	format('~w~n', [PredName/Arity]),
+	format(user_output, '~w~n', [PredName/Arity]),
 	write_list_with_format(List, '   *~w~n').
 
 find_pred_source_file(Functor, SourceFile) :-
@@ -461,7 +461,7 @@ mult :-
  	\+ predicate_property(Predicate, multifile),
 	File1 @< File2,
 	functor(Predicate, Functor, Arity),
-	format('#### Predicate ~a/~d is defined in modules/files:~n~5c* ~a:~a~n~7cand~n~5c* ~a:~a~n~n',
+	format(user_output, '#### Predicate ~a/~d is defined in modules/files:~n~5c* ~a:~a~n~7cand~n~5c* ~a:~a~n~n',
 	       [Functor,Arity,0' ,Module1,File1,0' ,0' ,Module2,File2]),
 	fail
       ; true.
@@ -495,7 +495,7 @@ fap2(PredName1, PredName2) :-
 
 sf :-
 	source_file(F),
-	format('~w~n', [F]),
+	format(user_output, '~w~n', [F]),
 	fail
       ; true.
 
@@ -520,7 +520,7 @@ write_numbered_list(List) :- write_numbered_list_1(List, 1).
 
 write_numbered_list_1([], _).
 write_numbered_list_1([H|T], Num) :-
-	format('~w: ~w~n', [Num,H]),
+	format(user_output, '~w: ~w~n', [Num,H]),
 	Num1 is Num + 1,
 	write_numbered_list_1(T, Num1).
 
@@ -531,7 +531,7 @@ partial_listing(PredicateName, Number) :-
 
 print_first_n_elements(Number, Number, _List) :- !.
 print_first_n_elements(Number, Temp, [H|T]) :-
-	format('~w~n', [H]),
+	format(user_output, '~w~n', [H]),
 	NextTemp is Temp + 1,
 	print_first_n_elements(Number, NextTemp, T).
 
@@ -566,13 +566,13 @@ write_all_to_file(Variable, Goal, File) :-
 
 write_all(Variable, Goal) :-
 	call(Goal),
-	format('~w~n', [Variable]),
+	format(user_output, '~w~n', [Variable]),
 	fail
       ; true.
 
 writeq_all(Variable, Goal) :-
 	call(Goal),
-	format('~q~n', [Variable]),
+	format(user_output, '~q~n', [Variable]),
 	fail
       ; true.
 

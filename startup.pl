@@ -68,16 +68,11 @@ show_init_data(PWD) :-
 determine_application(PWD, Area) :-
 	( sub_atom('SKR', PWD) ->
 	  Area = skr
+	; sub_atom('skr', PWD) ->
+	  Area = skr
 	; sub_atom('emrep', PWD) ->
 	  Area = usemrep
-	; environ('USER', USER),
-	  ( USER == 'lang' ->
-	    Area = skr
-	  ; USER == 'alan' ->
-	    Area = skr
-	  ; format('~n~nNot in application directory; application env not initiated.~n~n', []),
-	    fail
-	  )
+	; format('~n~nNot in application directory; application env not initiated.~n~n', [])
 	).
 
 
@@ -104,8 +99,6 @@ retract_user_defined_paths :-
 iap :- init_application_paths(skr, devl).
 
 init_skr :- init_application_paths(skr, devl).
-
-init_semrep :- init_application_paths(semrep, devl).
 
 init_application_paths(App, Env) :-
 	format('~nInitiating paths for ~w in ~w environment....~n~n', [App, Env]),
@@ -187,10 +180,8 @@ static_path_data(specialist_prod,       [path(nls), 		specialist]).
 static_path_data(saw_devl,              [path(specialist_devl), 'SAW']).
 static_path_data(saw_prod,              [path(specialist_prod), 'SAW']).
 static_path_data(skr_src_home,          env('SKR_SRC_HOME')).
-static_path_data(skr_home,          	env('SKR_HOME')).
 static_path_data(abgene,		[path(saw_prod),	abgene]).
 static_path_data(lexicon_base,  	[path(skr_src_home),	lexicon]).
-static_path_data(usemrep,		[path(saw_devl),	'USemrep']).
 
 % These path definitions are the ones used in use_module declarations
 define_path(_, 		home,               env('HOME')).
@@ -204,14 +195,4 @@ define_path(_, 		skr_lib,            [path(skr_src_home),	 lib]).
 define_path(_, 		tagger,             [path(skr_src_home),	 tagger]).
 define_path(_, 		text,		    [path(skr_src_home),	 text]).
 define_path(_, 		wsd,                [path(skr_src_home),	 'WSD/WSD']).
-
-define_path(usemrep, 	abgene,             path(abgene)).
-define_path(usemrep, 	main_specialist,    [path(skr_src_home), lib]).
-define_path(usemrep,	usemrep_main,       [path(usemrep),  	 usemrep_main]).
-define_path(usemrep,	usemrep_lib,        [path(usemrep),  	 usemrep_lib]).
-define_path(usemrep,	usemrep_domain,     [path(usemrep),  	 usemrep_domain]).
-define_path(usemrep,	usemrep_vocabulary, [path(usemrep),  	 usemrep_vocabulary]).
-define_path(usemrep,	mca, 		    [path(usemrep),  	 'MCA']).
-define_path(usemrep,	tag_parser,	    [path(usemrep),  	 'TGP']).
-
-define_path(skr,	mm_tools_lib,       [path(skr_home),	 'tools/lib']).
+define_path(_,	        mm_tools_lib,       [path(skr_src_home), '../tools/lib']).
