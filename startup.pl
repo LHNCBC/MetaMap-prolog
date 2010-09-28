@@ -55,13 +55,7 @@ show_init_data(PWD) :-
 	unix(args(Args)),
 	format('PWD:  ~w~nARGS: ~w~n', [PWD,Args]),
 	format('~nOpen Streams:~n', []),
-	show_all_streams,
-	format('~nControl Options:~n', []),
-	list_control_options,
-	format('~nFile Overrides:~n', []),
-	bcl override_file,
-	format('~nControl Option Overrides:~n', []),
-	bcl override_control_option.
+	show_all_streams.
 
 % If 'USemrep' is a sub_atom of the current working directory,
 % then the area is USEMREP; otherwise, it's ORIGINAL_SYSTEMS.

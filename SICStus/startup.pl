@@ -51,13 +51,7 @@ compile_application(PWD) :-
 show_init_data(PWD) :-
 	format('PWD:  ~w~n', [PWD]),
 	format('~nOpen Streams:~n', []),
-	show_all_streams,
-	format('~nControl Options:~n', []),
-	list_control_options.
-	% format('~nFile Overrides:~n', []),
-	% bcl override_file,
-	% format('~nControl Option Overrides:~n', []),
-	% bcl override_control_option.
+	show_all_streams.
 
 possibly_environ(EnvironVar, Value) :-
 	( environ(EnvironVar, Value) ->

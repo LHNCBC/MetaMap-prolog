@@ -153,25 +153,6 @@ lsa           	    :- listing.
 % s   Predicate 	    :- spy Predicate.
 u Command     	    :- unix(system(Command)).
 
-lco :- list_control_options.
-
-% list control options
-list_control_options :-
-	( current_predicate(control_option, _:_) ->
-	  true
-	; current_predicate(control_value, _:_)
-	),
-	( nls_system:control_option(ControlOption)
-	; nls_system:control_value(ControlOption, X, Y)
-	),
-	nls_system:is_control_option(usemrep, ShortControlOption, ControlOption, _, _),
-	( nonvar(X) ->
-	  format(user_output, '~N-~w: ~w ~w ~w~n', [ShortControlOption,ControlOption,X,Y])
-	; format(user_output, '~N-~w: ~w~n', [ShortControlOption,ControlOption])
-	),
-	fail
-      ; true.
-
 % assert control options
 aco(Option) :-
 	var(Option),
