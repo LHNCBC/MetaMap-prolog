@@ -52,8 +52,7 @@ show_init_data(PWD) :-
 	format('PWD:  ~w~n', [PWD]),
 	format('~nOpen Streams:~n', []),
 	show_all_streams,
-	format('~nControl Options:~n', []),
-	list_control_options.
+	format('~nControl Options:~n', []).
 	% format('~nFile Overrides:~n', []),
 	% bcl override_file,
 	% format('~nControl Option Overrides:~n', []),
