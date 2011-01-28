@@ -41,6 +41,7 @@ map_preds_to_arities([Pred1|RestPreds], [Arity1|RestArities]) :-
 	
 warn_multiple_arity_predicates([], _FileName).
 warn_multiple_arity_predicates([Pred:ArityList|Rest], FileName) :-
-	format('~NWARNING: Predicate "~q" in file~n~w has multiple arities: ~w~n',
+	format(user_output,
+	       '~NWARNING: Predicate "~q" in file~n~w has multiple arities: ~w~n',
 	       [Pred, FileName, ArityList]),
 	warn_multiple_arity_predicates(Rest, FileName).

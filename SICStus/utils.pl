@@ -21,7 +21,8 @@ A =? B :-
 
 h    :- halt.
 
-ini  :- force_reload_file(myhome('prolog.ini')).
+ini  :- [myhome('sicstus.ini')].
+
 pcc  :-
 	environ('HOME', HOME),
 	concat_atoms([HOME, '/specialist/bin/pcc.pl'], PCCFile),
@@ -37,10 +38,21 @@ show_all_preds :-
 d   :- debugging.
 n   :- nospyall, nodebug.
 
-sas :- show_all_streams.
 % show all streams
+sas :- show_all_streams.
+
 show_all_streams :-
 	write_all(FileName-StreamType-StreamID, current_stream(FileName,StreamType,StreamID)).
+
+s(Pred) :-
+	( Pred = Module:Predicate/Arity ->
+	  spy(Module:Predicate/Arity)
+	; Pred = Module:Predicate ->
+	  spy(Module:Predicate)
+	; current_predicate(Pred, Module:_),
+	  spy(Module:Pred)
+	).
+
 
 % close all streams
 cas :-
@@ -50,14 +62,27 @@ cas :-
 	fail
       ; true.
 
+% trace predicate
+tp(Pred) :-
+	( Pred = Module:Predicate/Arity ->
+	  spy(Module:Predicate/Arity, -[print,proceed,debug])
+	; Pred = Predicate/Arity ->
+	  current_predicate(Predicate, Module:Skeletal),
+	  functor(Skeletal, Predicate, Arity),
+	  spy(Module:Predicate/Arity, -[print,proceed,debug])
+	; current_predicate(Pred, Module:Skeletal),
+	  functor(Skeletal, Predicate, Arity),
+	  spy(Module:Predicate/Arity, -[print,proceed,debug])
+	).
+	    
 
 % close all databases
-cad :-
-	db_current(DBName, Mode, _SpecList, _EnvRef, DBRef),
-	format(user_output, '~w~n', [DBName-Mode-DBRef]),
-	db_close(DBRef),
-	fail
-      ; true.
+% cad :-
+% 	db_current(DBName, Mode, _SpecList, _EnvRef, DBRef),
+% 	format(user_output, '~w~n', [DBName-Mode-DBRef]),
+% 	db_close(DBRef),
+% 	fail
+%       ; true.
 
 
 % file search path
@@ -440,7 +465,6 @@ write_one_predicate(PredName/Arity-List) :-
 find_pred_source_file(Functor, SourceFile) :-
 	current_predicate(Functor, SkeletalSpecification),
 	source_file(SkeletalSpecification, SourceFile).
-
 
 mult :-
 	source_file(Module1:Predicate, File1),

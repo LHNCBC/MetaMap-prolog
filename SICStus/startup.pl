@@ -45,14 +45,16 @@ compile_application(PWD) :-
 	concat_atoms([PWD, '/', 'loader.pl'], File),
 	( file_exists(File) ->
 	  [File]
-        ; format('No loader.pl found in ~w.~n', [PWD])
+        ; format(user_output, 'No loader.pl found in ~w.~n', [PWD])
 	).
 
 show_init_data(PWD) :-
-	format('PWD:  ~w~n', [PWD]),
-	format('~nOpen Streams:~n', []),
-	show_all_streams,
-	format('~nControl Options:~n', []).
+	format(user_output, 'PWD:  ~w~n', [PWD]),
+	possibly_environ('EXTRA_SICSTUS_ARGS', Args),
+	format(user_output, 'ARGS: ~w~n', [Args]),
+	format(user_output, '~nOpen Streams:~n', []),
+	show_all_streams.
+	% format('~nControl Options:~n', []).
 	% format('~nFile Overrides:~n', []),
 	% bcl override_file,
 	% format('~nControl Option Overrides:~n', []),
@@ -76,7 +78,8 @@ determine_application(PWD, Area) :-
 	    Area = skr
 	  ; USER == 'alan' ->
 	    Area = skr
-	  ; format('~n~nNot in application directory; application env not initiated.~n~n', []),
+	  ; format(user_output,
+		   '~n~nNot in application directory; application env not initiated.~n~n', []),
 	    fail
 	  )
 	).
@@ -106,17 +109,17 @@ iap :- init_application_paths(skr, devl).
 init_skr :- init_application_paths(skr, devl).
 
 init_application_paths(App, Env) :-
-	format('~nInitiating paths for ~w in ~w environment....~n~n', [App, Env]),
+	format(user_output, '~nInitiating paths for ~w in ~w environment....~n~n', [App, Env]),
 	max_area_length(MaxAreaLength),
 	% retract_user_defined_paths,
 	define_path(App, Area, Data),
 	% translate_path(Data, App, Env, Path),
-	% format('~nTranslating ~w ~w ~w ~w.~n', [Data, App, Env, Path]),
+	% format(user_output, '~nTranslating ~w ~w ~w ~w.~n', [Data, App, Env, Path]),
 	translate_path_test(Data, App, Env, Path),
 	atom_codes(Area, AreaString),
 	length(AreaString, AreaLength),
 	Padding is MaxAreaLength + 3 - AreaLength,
-	format('~*c~w : ~w~n', [Padding, 32, Area, Path]),
+	format(user_output, '~*c~w : ~w~n', [Padding, 32, Area, Path]),
 	assertz(file_search_path(Area, Path)),
         fail
       ; nl.
@@ -138,7 +141,7 @@ make_list(Term, List) :-
 translate_path_test(Data, App, Env, Path) :-
 	( translate_path(Data, App, Env, Path) ->
 	  true
-	; format('~nERROR: Translation of ~w ~w ~w failed!!~n', [Data, App, Env]),
+	; format(user_output, '~nERROR: Translation of ~w ~w ~w failed!!~n', [Data, App, Env]),
 	  abort
 	).
 
