@@ -44,7 +44,7 @@ init_application(PWD, Env) :-
 compile_application(PWD) :-
 	concat_atoms([PWD, '/', 'loader.pl'], File),
 	( file_exists(File) ->
-	  [File]
+	  compile(File)
         ; format(user_output, 'No loader.pl found in ~w.~n', [PWD])
 	).
 
@@ -74,7 +74,7 @@ determine_application(PWD, Area) :-
 	; sub_atom('public_mm', PWD) ->
 	  Area = skr
 	; environ('USER', USER),
-	  ( USER == 'lang' ->
+	  ( USER == 'flang' ->
 	    Area = skr
 	  ; USER == 'alan' ->
 	    Area = skr
@@ -112,7 +112,7 @@ init_application_paths(App, Env) :-
 	format(user_output, '~nInitiating paths for ~w in ~w environment....~n~n', [App, Env]),
 	max_area_length(MaxAreaLength),
 	% retract_user_defined_paths,
-	define_path(App, Area, Data),
+	define_path(Area, Data),
 	% translate_path(Data, App, Env, Path),
 	% format(user_output, '~nTranslating ~w ~w ~w ~w.~n', [Data, App, Env, Path]),
 	translate_path_test(Data, App, Env, Path),
@@ -126,9 +126,9 @@ init_application_paths(App, Env) :-
 
 max_area_length(MaxAreaLength) :-
 	setof(Length,
-	      App^Area^Data^AreaString^(define_path(App, Area, Data),
-	      				name(Area, AreaString),
-					length(AreaString,Length)),
+	      Area^Data^AreaString^(define_path(Area, Data),
+				    name(Area, AreaString),
+				    length(AreaString,Length)),
 	      AllLengths),
         last(AllLengths, MaxAreaLength).
 
@@ -173,29 +173,46 @@ translate_one_path_element(env(Component), _App, _Env, [Path,'/'|RestPath], Rest
 	!,
 	environ(Component, Path).
 translate_one_path_element(Component, _App, _Env, [Component,'/'|RestPath], RestPath).
+static_path_data(abgene,		[path(saw_prod),	abgene]).
 
 static_path_data(home,			env('HOME')).
 static_path_data(nls,			env('NLS')).
 static_path_data(specialist,            [env('NLS'), 		specialist]).
 static_path_data(specialist_devl,       [path(home), 		specialist]).
 static_path_data(specialist_prod,       [path(nls), 		specialist]).
-static_path_data(saw_devl,              [path(specialist_devl), 'SAW']).
-static_path_data(saw_prod,              [path(specialist_prod), 'SAW']).
 static_path_data(skr_src_home,          env('SKR_SRC_HOME')).
-static_path_data(abgene,		[path(saw_prod),	abgene]).
-static_path_data(lexicon_base,  	[path(skr_src_home),	lexicon]).
 
 % These path definitions are the ones used in use_module declarations
-define_path(_, 		home,               env('HOME')).
-define_path(_, 		lexicon,            [path(lexicon_base), lexicon]).
-define_path(_, 		metamap,            [path(skr_src_home), metamap]).
-define_path(_, 		morph,		    [path(lexicon_base), morph]).
-define_path(_, 		mmi,                [path(skr_src_home),	 mmi]).
-define_path(_, 		skr,                [path(skr_src_home),	 skr]).
-define_path(_, 		skr_db,             [path(skr_src_home),	 db]).
-define_path(_, 		skr_lib,            [path(skr_src_home),	 lib]).
-define_path(_, 		tagger,             [path(skr_src_home),	 tagger]).
-define_path(_, 		text,		    [path(skr_src_home),	 text]).
-define_path(_, 		wsd,                [path(skr_src_home),	 'WSD/WSD']).
-define_path(_,		mm_tools_lib,       [path(skr_src_home), '../tools.SICStus/lib']).
+define_path(home,               env('HOME')).
+define_path(lexicon,            [path(skr_src_home), lexicon, lexicon]).
+% define_path(lexicon,            [path(skr_src_home), .., lexicon, lexicon]).
+% define_path(lexicon,            [path(skr_src_home), .., .., lexicon, lexicon]).
+define_path(metamap,            [path(skr_src_home), metamap]).
+% define_path(metamap,            [path(skr_src_home), .., metamap]).
+% define_path(metamap,            [path(skr_src_home), .., .., metamap]).
+define_path(morph,		[path(skr_src_home), lexicon, morph]).
+% define_path(morph,		[path(skr_src_home), .., lexicon, morph]).
+% define_path(morph,		[path(skr_src_home), .., .., lexicon, morph]).
+define_path(mmi,                [path(skr_src_home), mmi]).
+% define_path(mmi,                [path(skr_src_home), .., mmi]).
+% define_path(mmi,                [path(skr_src_home), .., .., mmi]).
+define_path(skr,                [path(skr_src_home), skr]).
+% define_path(skr,                [path(skr_src_home), .., skr]).
+% define_path(skr,                [path(skr_src_home), .., .., skr]).
+define_path(skr_db,             [path(skr_src_home), db]).
+% define_path(skr_db,             [path(skr_src_home), .., db]).
+% define_path(skr_db,             [path(skr_src_home), .., .., db]).
+define_path(skr_lib,            [path(skr_src_home), lib]).
+% define_path(skr_lib,            [path(skr_src_home), .., lib]).
+% define_path(skr_lib,            [path(skr_src_home), .., .., lib]).
+define_path(tagger,             [path(skr_src_home), tagger]).
+% define_path(tagger,             [path(skr_src_home), .., tagger]).
+% define_path(tagger,             [path(skr_src_home), .., .., tagger]).
+define_path(text,	    	[path(skr_src_home), text]).
+% define_path(text,	    	[path(skr_src_home), .., text]).
+% define_path(text,	    	[path(skr_src_home), .., .., text]).
+define_path(wsd,                [path(skr_src_home), 'WSD/WSD']).
+% define_path(wsd,                [path(skr_src_home), .., 'WSD/WSD']).
+% define_path(wsd,                [path(skr_src_home), .., .., 'WSD/WSD']).
+define_path(mm_tools_lib,	[path(skr_src_home), '../tools/lib']).
 

@@ -49,9 +49,20 @@ s(Pred) :-
 	  spy(Module:Predicate/Arity)
 	; Pred = Module:Predicate ->
 	  spy(Module:Predicate)
-	; current_predicate(Pred, Module:_),
-	  spy(Module:Pred)
-	).
+	; Pred = Predicate/Arity ->
+	  current_predicate(Predicate, Module:Term),
+	  functor(Term, Predicate, Arity),
+	  spy(Module:Predicate/Arity)
+	; current_predicate(Pred, _Mod:_) ->
+	  ( current_predicate(Pred, Module:Template),
+	    functor(Template, Pred, Arity),
+	    spy(Module:Pred/Arity),
+	    fail
+	  ; true
+	  )
+	),
+	!.
+s(Pred) :- format(user_output, '~n~n### Attempt to spy ~q failed!~n~n', [Pred]).
 
 
 % close all streams

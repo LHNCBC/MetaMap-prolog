@@ -23,10 +23,10 @@ concat_atoms_1([Next|Rest], First, Atom) :-
 % :- ensure_loaded('~/specialist/SKR/src.SICStus/lib/ctypes').
 % :- ensure_loaded('~/specialist/SKR/src.SICStus/lib/sicstus_utils').
 
-:- op(700, fy, bcl).       % BASE CLAUSE LISTING: allows   | ?- bcl <predicate>.
-:- op(700, fy, bcc).       % BASE CLAUSE COUNT:   allows   | ?- bcc <predicate>. 
-:- op(700, fy, ls).        % LISTING:             allows   | ?- l <predicate>. 
-:- op(700, fy, u).         % run a Unix command
+% :- op(700, fy, bcl).       % BASE CLAUSE LISTING: allows   | ?- bcl <predicate>.
+% :- op(700, fy, bcc).       % BASE CLAUSE COUNT:   allows   | ?- bcc <predicate>. 
+% :- op(700, fy, ls).        % LISTING:             allows   | ?- l <predicate>. 
+% :- op(700, fy, u).         % run a Unix command
 :- op(700, xfx, =?).       % testing equality
 
 :- [messages].
