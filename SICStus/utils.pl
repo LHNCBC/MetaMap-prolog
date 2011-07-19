@@ -200,13 +200,13 @@ base_clause_listing_1(Predicate, Module, Skeletal) :-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-bcl Predicate 	    :- base_clause_listing(Predicate).
-ls Predicate   	    :- listing(Predicate).
+bcl(Predicate) 	    :- base_clause_listing(Predicate).
+ls(Predicate)  	    :- listing(Predicate).
 lsa           	    :- listing.
 
 % ms  Predicate 	    :- myspy(Predicate).
 % s   Predicate 	    :- spy Predicate.
-u Command     	    :- unix(system(Command)).
+u(Command)     	    :- unix(system(Command)).
 
 % assert control options
 aco(Option) :-
@@ -310,7 +310,7 @@ orf :-
 	 ).
 
 % bcc Predicate/Arity :- base_clause_count(Predicate, Arity, Num), write(Predicate/Arity-Num), nl, fail ; true.
-bcc Predicate :-
+bcc(Predicate) :-
 	( Predicate = Pred/_Arity ->
 	  P = Pred
         ; Predicate = _Module:Pred/_Arity ->
