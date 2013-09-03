@@ -16,19 +16,19 @@ l :- init_application_environment.
 a :- environ('PWD', PWD), show_init_data(PWD).
 
 init_application_environment :-
-	environ('HOME', HOME),
+	environ('GWA', GWA),
 	environ('PWD',  PWD),
-	determine_environment(HOME, PWD, Env),
+	determine_environment(GWA, PWD, Env),
  	init_application(PWD, Env),
 	nl,
 	show_init_data(PWD).
 
 % If the user's home directory is a sub_atom of the current working directory,
 % then the environment is DEVELOPMENT; otherwise, it's PRODUCTION.
-determine_environment(HOME, PWD, Environment) :-
+determine_environment(GWA, PWD, Environment) :-
 	( sub_atom('SICS', PWD) ->
 	  Environment = sics
-	; sub_atom(HOME, PWD) ->
+	; sub_atom(GWA, PWD) ->
 	  Environment = devl
 	; Environment = prod
 	).
@@ -175,7 +175,7 @@ translate_one_path_element(env(Component), _App, _Env, [Path,'/'|RestPath], Rest
 translate_one_path_element(Component, _App, _Env, [Component,'/'|RestPath], RestPath).
 static_path_data(abgene,		[path(saw_prod),	abgene]).
 
-static_path_data(home,			env('HOME')).
+static_path_data(home,			env('GWA')).
 static_path_data(nls,			env('NLS')).
 static_path_data(specialist,            [env('NLS'), 		specialist]).
 static_path_data(specialist_devl,       [path(home), 		specialist]).
@@ -183,7 +183,7 @@ static_path_data(specialist_prod,       [path(nls), 		specialist]).
 static_path_data(skr_src_home,          env('SKR_SRC_HOME')).
 
 % These path definitions are the ones used in use_module declarations
-define_path(home,               env('HOME')).
+define_path(home,               env('GWA')).
 define_path(lexicon,            [path(skr_src_home), lexicon, lexicon]).
 % define_path(lexicon,            [path(skr_src_home), .., lexicon, lexicon]).
 % define_path(lexicon,            [path(skr_src_home), .., .., lexicon, lexicon]).

@@ -43,8 +43,8 @@ concat_atoms_1([Next|Rest], First, Atom) :-
 
 :- environ('SKR', SKR),
    atom_concat(SKR, '/prolog/', SKRPrologUtilsDir),
-   environ('HOME', HOME),
-   atom_concat(HOME, '/specialist/SKR/prolog/SICStus', HomePrologUtilsDir),
+   environ('GWA', GWA),
+   atom_concat(GWA, '/specialist/SKR/prolog/SICStus', HomePrologUtilsDir),
    asserta(file_search_path(prolog_utils, SKRPrologUtilsDir)),
    asserta(file_search_path(prolog_utils, HomePrologUtilsDir)).
 

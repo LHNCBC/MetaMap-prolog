@@ -21,12 +21,12 @@ A =? B :-
 
 h    :- halt.
 
-ini  :- [myhome('sicstus.ini')].
+ini  :- [home('sicstus.ini')].
 
-pcc  :-
-	environ('HOME', HOME),
-	concat_atoms([HOME, '/specialist/bin/pcc.pl'], PCCFile),
-	compile(PCCFile).
+% pcc  :-
+% 	environ('HOME', HOME),
+% 	concat_atoms([HOME, '/specialist/bin/pcc.pl'], PCCFile),
+% 	compile(PCCFile).
 
 show_all_preds :-
 	source_file(Pred, File),
@@ -380,9 +380,11 @@ find_predicate(0, Atom, Predicate, Arity, SourceFileOrPropertyList) :-
 find_predicate(1, Atom, Predicate, Arity, Module) :-
 	% no_module_predicate_property(SkeletalSpecification, Module, _Property),
 	% source_file(Module:SkeletalSpecification, _File),
-	predicate_property(Module:SkeletalSpecification, Property),
-	Property \== built_in,
-	functor(SkeletalSpecification, Predicate, Arity),
+	source_file(_Module:Term, AbsFile),
+	basename(AbsFile, Module),
+	% predicate_property(Module:SkeletalSpecification, _Property),
+	% Property \== built_in,
+	functor(Term, Predicate, Arity),
 	sub_atom(Atom, Predicate).
 
 source_file_or_predicate_property(SkeletalSpecification, FileOrProperty) :-
@@ -400,7 +402,7 @@ find_all_predicates(0, Atom, PredicateList) :-
 % returns a list of elements of the form
 % domain_processing:add_msu_index/3
 find_all_predicates(1, Atom, PredicateList) :-
-	setof(PredicateName/Arity,
+	setof(Module:PredicateName/Arity,
               Module^find_predicate(1, Atom, PredicateName, Arity, Module),
 	      PredicateList).
 
@@ -413,15 +415,9 @@ write_one_predicate_from_list(PredicateName/Arity) :-
 	!,
 	write_one_predicate_from_list(_Module:PredicateName/Arity).
 
-write_one_predicate_from_list(Module:PredicateName/Arity) :-
+write_one_predicate_from_list(File:PredicateName/Arity) :-
 	!,
-	functor(SkeletalSpecification, PredicateName, Arity),
-	setof(SourceFileOrProperty,
-	      Module^source_file_or_predicate_property(Module:SkeletalSpecification, 
-	      					SourceFileOrProperty),
-	      SourceFileOrPropertyList),
-	write_one_predicate(PredicateName/Arity-SourceFileOrPropertyList),
-	nl.
+	format(user, '~w/~w:~w~n', [PredicateName,Arity,File]).
 write_one_predicate_from_list(PredicateName) :-
 	write_one_predicate_from_list(_Module:PredicateName/_Arity).
 
