@@ -1,8 +1,12 @@
-:- use_module(library(bdb), [
-	db_close/1,
-    	db_current/5
-   ]).
+% :- use_module(library(bdb), [
+% 	db_close/1,
+%     	db_current/5
+%    ]).
 
+
+:- use_module(library(sets), [
+	intersection/3
+   ]).
 
 :- use_module(library(system), [
 	environ/2
@@ -23,6 +27,29 @@ h    :- halt.
 
 ini  :- [home('sicstus.ini')].
 
+mult_arity_pred(SourceFile, Func, Arity1, Arity2) :-
+	source_file(M:P1, SourceFile),
+	sicstus_utils:sub_atom(SourceFile, _, _, _, src),
+	source_file(M:P2, SourceFile),
+	functor(P1, Func, Arity1),
+	functor(P2, Func, Arity2),
+	Arity1 < Arity2.
+
+dups :-
+	findall(SourceFile:Func-Arity1-Arity2,
+	        mult_arity_pred(SourceFile, Func, Arity1, Arity2),
+		List),
+     member(SourceFile:Func-Arity1-Arity2, List),
+     atom_codes(SourceFile, FileCodes),
+     nls_strings:split_string_completely(FileCodes, "/", FileParts),
+     last(FileParts, FileNameCodes),
+     atom_codes(FileName, FileNameCodes),
+     write(FileName:Func/Arity1/Arity2),
+     nl,
+     fail
+   ; true.
+
+
 % pcc  :-
 % 	environ('HOME', HOME),
 % 	concat_atoms([HOME, '/specialist/bin/pcc.pl'], PCCFile),
@@ -42,7 +69,11 @@ n   :- nospyall, nodebug.
 sas :- show_all_streams.
 
 show_all_streams :-
-	write_all(FileName-StreamType-StreamID, current_stream(FileName,StreamType,StreamID)).
+	current_stream(FileName,StreamType,StreamID),
+	write(user_output, FileName-StreamType-StreamID),
+	nl(user_output),
+	fail
+      ; true.
 
 s(Pred) :-
 	( Pred = Module:Predicate/Arity ->
@@ -110,6 +141,7 @@ ins :- '~/prolog/instrument.pl'.
 %%% :- prolog_flag(character_escapes, _, on).
 
 %%% unknown_predicate_handler(_, _, _).
+% unknown_predicate_handler(_, _, _) :- !.
 
 unknown_predicate_handler(Goal, Module1, fail) :-
 	functor(Goal, Functor, Arity1),
@@ -369,23 +401,34 @@ no_module_predicate_property(Specification, Module, Property) :-
 	predicate_property(Module:Specification, Property),
 	\+ predicate_property(Module:Specification, built_in).
 
-find_predicate(0, Atom, Predicate, Arity, SourceFileOrPropertyList) :-
-	predicate_property(SkeletalSpecification, _Property),
-	functor(SkeletalSpecification, Predicate, Arity),
-	sub_atom(Atom, Predicate),
-	setof(SourceFileOrProperty,
-	      source_file_or_predicate_property(SkeletalSpecification, SourceFileOrProperty),
-	      SourceFileOrPropertyList).
+% find_predicate(0, Atom, Predicate, Arity, SourceFileOrPropertyList) :-
+% 	predicate_property(SkeletalSpecification, _Property),
+% 	functor(SkeletalSpecification, Predicate, Arity),
+% 	sub_atom(Atom, Predicate),
+% 	setof(SourceFileOrProperty,
+% 	      source_file_or_predicate_property(SkeletalSpecification, SourceFileOrProperty),
+% 	      SourceFileOrPropertyList).
 
-find_predicate(1, Atom, Predicate, Arity, Module) :-
+find_predicate(1, Atom, Functor, Arity, Module) :-
 	% no_module_predicate_property(SkeletalSpecification, Module, _Property),
 	% source_file(Module:SkeletalSpecification, _File),
-	source_file(_Module:Term, AbsFile),
-	basename(AbsFile, Module),
+	( current_predicate(Module:Functor/Arity)
+	; current_predicate(Functor/Arity)
+	; predicate_property(Term, built_in),
+	  functor(Term, Functor, Arity)
+	),
+	sub_atom(Atom, Functor),
+	( source_file(Module:Term, AbsFile) ->
+	  basename(AbsFile, FileName)
+	; source_file(Term, AbsFile) ->
+	  basename(AbsFile, FileName)
+	; Module = built_in
+	).
 	% predicate_property(Module:SkeletalSpecification, _Property),
 	% Property \== built_in,
-	functor(Term, Predicate, Arity),
-	sub_atom(Atom, Predicate).
+
+fml_format(Stream, Format, [Pred]) :-
+	format(Stream, Format, [Pred]).
 
 source_file_or_predicate_property(SkeletalSpecification, FileOrProperty) :-
 	source_file(SkeletalSpecification, FileOrProperty)
@@ -394,22 +437,27 @@ source_file_or_predicate_property(SkeletalSpecification, FileOrProperty) :-
 % returns a list of elements of the form
 % index/3-['/net/nls3/export/home/quintus/quintus3.5/generic/qplib3.5/library/strings.pl',
 %          compiled,(locked),imported_from(strings)]
-find_all_predicates(0, Atom, PredicateList) :-
-	setof(PredicateName/Arity-SourceFileOrPropertyList,
-              find_predicate(0, Atom, PredicateName, Arity, SourceFileOrPropertyList),
-	      PredicateList).
+% find_all_predicates(0, Atom, PredicateList) :-
+% 	setof(PredicateName/Arity-SourceFileOrPropertyList,
+%               find_predicate(0, Atom, PredicateName, Arity, SourceFileOrPropertyList),
+% 	      PredicateList).
 
 % returns a list of elements of the form
 % domain_processing:add_msu_index/3
-find_all_predicates(1, Atom, PredicateList) :-
-	setof(Module:PredicateName/Arity,
-              Module^find_predicate(1, Atom, PredicateName, Arity, Module),
+find_all_predicates(1, PartialPredicateName, PredicateList) :-
+	( number(PartialPredicateName) ->
+	  number_codes(PartialPredicateName, Codes),
+	  atom_codes(Atom, Codes)
+	; Atom = PartialPredicateName
+	),
+	setof(Module:Functor/Arity,
+              Module^find_predicate(1, Atom, Functor, Arity, Module),
 	      PredicateList).
 
-write_all_predicate_lists([]).
-write_all_predicate_lists([H|T]) :-
+write_predicate_list([]).
+write_predicate_list([H|T]) :-
 	write_one_predicate_from_list(H),
-	write_all_predicate_lists(T).
+	write_predicate_list(T).
 
 write_one_predicate_from_list(PredicateName/Arity) :-
 	!,
@@ -417,61 +465,56 @@ write_one_predicate_from_list(PredicateName/Arity) :-
 
 write_one_predicate_from_list(File:PredicateName/Arity) :-
 	!,
-	format(user, '~w/~w:~w~n', [PredicateName,Arity,File]).
+	format(user, '~w:~w/~w~n', [File,PredicateName,Arity]).
 write_one_predicate_from_list(PredicateName) :-
 	write_one_predicate_from_list(_Module:PredicateName/_Arity).
 
-%	setof(PredicateName/Arity:SourceFileOrProperty,
-%              find_predicate(Private, Atom, PredicateName, Arity, SourceFileOrProperty),
-%	      PredicateList),
-%	      write_predicate_list_nl(PredicateList).
 
-find_all_predicates2(Atom1, Atom2) :-
-	Atom1 \== Atom2,
-	setof(PredicateName/Arity,
-	      Module^find_predicate(1, Atom1, PredicateName, Arity, Module),
-	      PredicateList),
-	matching_predicates(PredicateList, Atom2, MatchingPredicates),
-	write_all_predicate_lists(MatchingPredicates).
+% find_all_predicates2(Atom1, Atom2) :-
+% 	Atom1 \== Atom2,
+% 	setof(PredicateName/Arity,
+% 	      Module^find_predicate(1, Atom1, PredicateName, Arity, Module),
+% 	      PredicateList),
+% 	matching_predicates(PredicateList, Atom2, MatchingPredicates),
+% 	write_all_predicate_lists(MatchingPredicates).
 
-matching_predicates([], _Atom2, []).
-matching_predicates([First|Rest], Atom2, Matching) :-
-	First = PredicateName/_Arity,
-	( sub_atom(Atom2, PredicateName) ->
-	  Matching = [First|RestMatching]
-	; Matching = RestMatching
-	),
-	matching_predicates(Rest, Atom2, RestMatching).
+% matching_predicates([], _Atom2, []).
+% matching_predicates([First|Rest], Atom2, Matching) :-
+% 	First = PredicateName/_Arity,
+% 	( sub_atom(Atom2, PredicateName) ->
+% 	  Matching = [First|RestMatching]
+% 	; Matching = RestMatching
+% 	),
+% 	matching_predicates(Rest, Atom2, RestMatching).
 
+% remove_module(Specification, SkeletalSpecification) :-
+% 	( Specification = ModuleName:PossibleSkeletalSpecification ->
+% 	  ( var(ModuleName),
+% 	    var(PossibleSkeletalSpecification) ->
+% 	    SkeletalSpecification = ':'
+%            ; current_module(ModuleName) ->
+% 	     SkeletalSpecification = PossibleSkeletalSpecification
+% 	   )
+%         ; SkeletalSpecification = Specification
+%         ).
 
-remove_module(Specification, SkeletalSpecification) :-
-	( Specification = ModuleName:PossibleSkeletalSpecification ->
-	  ( var(ModuleName),
-	    var(PossibleSkeletalSpecification) ->
-	    SkeletalSpecification = ':'
-           ; current_module(ModuleName) ->
-	     SkeletalSpecification = PossibleSkeletalSpecification
-	   )
-        ; SkeletalSpecification = Specification
-        ).
+% write_predicate_list_nl([]).
+% % all list elements should be of the form PredName/Arity:PropertyList
+% write_predicate_list_nl([First|Rest]) :-
+% 	write_one_predicate(First),
+% 	nl,
+% 	write_predicate_list_nl(Rest).
 
-write_predicate_list_nl([]).
-% all list elements should be of the form PredName/Arity:PropertyList
-write_predicate_list_nl([First|Rest]) :-
-	write_one_predicate(First),
-	nl,
-	write_predicate_list_nl(Rest).
-
-write_one_predicate(Module:PredName/Arity-List) :-
-	format(user_output, '~w~n', [Module:PredName/Arity]),
-	write_list_with_format(List, '   *~w~n').
-write_one_predicate(PredName/Arity-List) :-
-	format(user_output, '~w~n', [PredName/Arity]),
-	write_list_with_format(List, '   *~w~n').
-
-find_pred_source_file(Functor, SourceFile) :-
-	current_predicate(Functor, SkeletalSpecification),
-	source_file(SkeletalSpecification, SourceFile).
+% write_one_predicate(Module:PredName/Arity-List) :-
+% 	format(user_output, '~w~n', [Module:PredName/Arity]),
+% 	write_list_with_format(List, '   *~w~n').
+% write_one_predicate(PredName/Arity-List) :-
+% 	format(user_output, '~w~n', [PredName/Arity]),
+% 	write_list_with_format(List, '   *~w~n').
+ 
+% find_pred_source_file(Functor, SourceFile) :-
+% 	current_predicate(Functor, SkeletalSpecification),
+% 	source_file(SkeletalSpecification, SourceFile).
 
 mult :-
 	source_file(Module1:Predicate, File1),
@@ -490,26 +533,22 @@ spy_all(PartialPredicateName, PredicateList) :-
 
 % find public and private predicates
 % must work on this to prevent duplications
-fap(PartialPredicateName) :- fap_1(PartialPredicateName, _PredicateList).
+fap(PartialPredicateName) :-
+	fap_1(PartialPredicateName, _PredicateList).
 
-fap_1(PartialPredicateName, PredicateList1) :-
+fap_1(PartialPredicateName, PredicateList) :-
 	% ( find_all_predicates(0, PartialPredicateName, PredicateList0),
 	%   write_predicate_list_nl(PredicateList0),
 	%   write('-------------'), nl,
 	%   fail
-	find_all_predicates(1, PartialPredicateName, PredicateList1),
-	write_all_predicate_lists(PredicateList1).
-
-fa1(PartialPredicateName) :-
-	find_all_predicates(0, PartialPredicateName, PredicateList0),
-	write_predicate_list_nl(PredicateList0).
-
-fa2(PartialPredicateName) :-
-	find_all_predicates(1, PartialPredicateName, PredicateList1),
-	write_all_predicate_lists(PredicateList1).
+	find_all_predicates(1, PartialPredicateName, PredicateList),
+	write_predicate_list(PredicateList).
 
 fap2(PredName1, PredName2) :-
-	find_all_predicates2(PredName1, PredName2).
+	find_all_predicates(1, PredName1, List1),
+	find_all_predicates(1, PredName2, List2),
+	intersection(List1, List2, ListBoth),
+	write_predicate_list(ListBoth).
 
 sf :-
 	source_file(F),

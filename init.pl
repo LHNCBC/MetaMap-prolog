@@ -41,10 +41,12 @@ concat_atoms_1([Next|Rest], First, Atom) :-
 % :- window_format(ancestors, _, [quoted(true),portrayed(true),max_depth(0)]).
 % :- emacs_debugger(_, on).
 
+:- [prolog:'patch14171.pl'].
+
 :- environ('SKR', SKR),
    atom_concat(SKR, '/prolog/', SKRPrologUtilsDir),
-   environ('GWA', GWA),
-   atom_concat(GWA, '/specialist/SKR/prolog/SICStus', HomePrologUtilsDir),
+   environ('GWAH', GWAH),
+   atom_concat(GWAH, '/specialist/SKR/prolog/', HomePrologUtilsDir),
    asserta(file_search_path(prolog_utils, SKRPrologUtilsDir)),
    asserta(file_search_path(prolog_utils, HomePrologUtilsDir)).
 

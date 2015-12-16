@@ -8,7 +8,7 @@ check_for_multiple_arities :-
 	      MultipleArityPredicates),
 	!,
 	nl,
-	warn_multiple_arity_predicates(MultipleArityPredicates, FileName),
+	warn_multiple_arity_predicates(MultipleArityPredicates),
 	nl.
 check_for_multiple_arities.
 
@@ -39,9 +39,11 @@ map_preds_to_arities([Pred1|RestPreds], [Arity1|RestArities]) :-
 	functor(Pred1, _Functor, Arity1),
 	map_preds_to_arities(RestPreds, RestArities).
 	
-warn_multiple_arity_predicates([], _FileName).
-warn_multiple_arity_predicates([Pred:ArityList|Rest], FileName) :-
-	format(user_output,
-	       '~NWARNING: Predicate "~q" in file~n~w has multiple arities: ~w~n',
-	       [Pred, FileName, ArityList]),
-	warn_multiple_arity_predicates(Rest, FileName).
+warn_multiple_arity_predicates([]).
+warn_multiple_arity_predicates([FileName-Pred:ArityList|Rest]) :-
+	( sub_atom(specialist, FileName) ->
+	  basename(FileName, BaseName),
+	  format(user_output, '~N~q/~w in ~w~n', [Pred, ArityList, BaseName])
+	; true
+	),
+	warn_multiple_arity_predicates(Rest).
