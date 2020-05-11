@@ -408,15 +408,14 @@ no_module_predicate_property(Specification, Module, Property) :-
 % 	setof(SourceFileOrProperty,
 % 	      source_file_or_predicate_property(SkeletalSpecification, SourceFileOrProperty),
 % 	      SourceFileOrPropertyList).
-
 find_predicate(1, Atom, Functor, Arity, Module) :-
 	% no_module_predicate_property(SkeletalSpecification, Module, _Property),
 	% source_file(Module:SkeletalSpecification, _File),
 	( current_predicate(Module:Functor/Arity)
 	; current_predicate(Functor/Arity)
-	; predicate_property(Term, built_in),
-	  functor(Term, Functor, Arity)
+	; predicate_property(Term, built_in)
 	),
+	functor(Term, Functor, Arity),
 	sub_atom(Atom, Functor),
 	( source_file(Module:Term, AbsFile) ->
 	  basename(AbsFile, FileName)
@@ -714,4 +713,32 @@ abolish_all_1(FileName, Suffix) :-
 	fail
       ; format(user_output, 'DONE ABOLISHING PREDICATES in file ~w.~n', [FileName]),
 	nl.
+
+env :-
+	setof(E-V, environ(E,V), AllEnv),
+	member(E-V, AllEnv),
+	write(E-V),
+	nl,
+	fail
+      ; true.
+	
+eg(Search) :-
+	atom_codes(Search, SearchCodes),
+	environ(E,V),
+	atom_codes(E, ECodes),
+	append(SearchCodes, _, ECodes),
+	write(E=V),
+	nl,
+	fail
+      ; true.
+
+ega(Search) :-
+	atom_codes(Search, SearchCodes),
+	environ(E,V),
+	atom_codes(V, VCodes),
+	append([_, SearchCodes, _], VCodes),
+	write(E=V),
+	nl,
+	fail
+      ; true.
 
